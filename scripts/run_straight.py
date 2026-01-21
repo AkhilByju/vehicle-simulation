@@ -1,7 +1,11 @@
 # scripts/run_and_visualize.py
 import sys, os
+
+from anyio import Path
+from datetime import datetime
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from sim.export import save_csv, save_json
 from sim.state import VehicleState
 from sim.integrator import run
 from models.straight_flat import StraightFlatModel
@@ -23,6 +27,17 @@ def main():
         v_eps=0.5
     )
     history = run(model, state, controller_full_throttle, T=120.0, dt=0.01)
+
+    # ---- EXPORT ----
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    out_dir = Path("outputs") / "straight_flat" / stamp
+    save_csv(history, out_dir / "telemetry.csv")
+    save_json(history, out_dir / "telemetry.json")
+
+    print(f"Saved: {out_dir/'telemetry.csv'}")
+    print(f"Saved: {out_dir/'telemetry.json'}")
+
+    # ---- VISUALIZE ----
     animate_history_on_track(history)
 
 
